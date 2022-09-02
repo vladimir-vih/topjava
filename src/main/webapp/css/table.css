@@ -1,0 +1,8 @@
+td, tr, th {
+    border: solid;
+    border-color: grey;
+    border-width: 2px;
+    padding: 1.5em;
+    margin-right: auto;
+    margin-left: auto;
+}
