@@ -43,7 +43,6 @@ public class MealsUtil {
         return meals.stream()
                 .filter(meal -> isBetweenHalfOpen(meal.getTime(), startTime, endTime))
                 .map(meal -> createTo(meal, caloriesSumByDate.get(meal.getDate()) > caloriesPerDay))
-                .sorted()
                 .collect(Collectors.toList());
     }
 

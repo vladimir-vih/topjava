@@ -1,9 +1,10 @@
 package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
+import ru.javawebinar.topjava.exception.NotExistStorageException;
 import ru.javawebinar.topjava.exception.WrongRequestParameters;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.storage.MealMapStorage;
+import ru.javawebinar.topjava.storage.InMemoryMealStorage;
 import ru.javawebinar.topjava.storage.MealStorage;
 import ru.javawebinar.topjava.util.MealsUtil;
 
@@ -18,31 +19,32 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class MealServlet extends HttpServlet {
     private static final int CALORIES_LIMIT = 2000;
     private final Logger log = getLogger(MealServlet.class);
+    private final MealStorage storage = new InMemoryMealStorage();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException,
             IOException, WrongRequestParameters {
-        MealStorage storage = MealMapStorage.getInstance();
         String action = request.getParameter("action");
         if (action != null) {
             Integer id;
             switch (action) {
                 case "add":
                     log.debug("Got request to ADD new meal");
-                    forwardRequest(request, response, action);
-                    break;
+                    request.getRequestDispatcher("/jsp/editMeal.jsp").forward(request, response);
+                    return;
                 case "edit":
                     id = getIntParam(request, "id");
                     log.debug("Got request to EDIT meal with id {}", id);
                     Meal meal = storage.get(id);
+                    if (meal == null) throw new NotExistStorageException();
                     request.setAttribute("meal", meal);
                     log.debug("Added meal {} to the request. Start forwarding to edit page", id);
-                    forwardRequest(request, response, action);
-                    break;
+                    request.getRequestDispatcher("/jsp/editMeal.jsp").forward(request, response);
+                    return;
                 case "delete":
                     id = getIntParam(request, "id");
                     log.debug("Got request to DELETE meal with id {}", id);
-                    storage.delete(id);
+                    if (!storage.delete(id)) throw new NotExistStorageException();
                     log.debug("Meal id: {} deleted", id);
                     response.sendRedirect("meals");
                     return;
@@ -56,7 +58,7 @@ public class MealServlet extends HttpServlet {
         request.setAttribute("mealsList",
                 MealsUtil.filteredByStreams(storage.getAll(), LocalTime.MIN, LocalTime.MAX, CALORIES_LIMIT));
         log.debug("Added meals list for the GET request. Start forwarding to the meals list page.");
-        request.getRequestDispatcher("/WEB-INF/jsp/meals.jsp").forward(request, response);
+        request.getRequestDispatcher("/jsp/meals.jsp").forward(request, response);
     }
 
     private Integer getIntParam(HttpServletRequest request, String name) throws WrongRequestParameters {
@@ -71,35 +73,27 @@ public class MealServlet extends HttpServlet {
         return integer;
     }
 
-    private void forwardRequest(HttpServletRequest request, HttpServletResponse response, String action) throws ServletException, IOException {
-        request.setAttribute("action", action);
-        request.getRequestDispatcher("WEB-INF/jsp/editmeal.jsp").forward(request, response);
-    }
-
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException,
             IOException {
+        log.info("Got POST request to add or edit meal");
         request.setCharacterEncoding("UTF-8");
         LocalDateTime dateTime = LocalDateTime.parse(request.getParameter("datetime"));
         String description = request.getParameter("description");
         Integer calories = getIntParam(request, "calories");
         Meal meal = new Meal(dateTime, description, calories);
-        MealStorage storage = MealMapStorage.getInstance();
-        String action = request.getParameter("action");
-        switch (action) {
-            case "add":
-                storage.add(meal);
-                break;
-            case "edit":
-                Integer id = getIntParam(request, "id");
-                meal.setId(id);
-                storage.update(meal);
-                break;
-            default:
-                String message = "Got wrong ACTION parameter in the /meals " + request.getMethod() + " request";
-                log.debug(message);
-                throw new WrongRequestParameters(message);
+        String idParam = request.getParameter("id");
+        if (idParam.isEmpty()) {
+            log.debug("Adding new meal with description {}", description);
+            storage.add(meal);
+        } else {
+            Integer id = Integer.parseInt(idParam);
+            meal.setId(id);
+            Meal result = storage.update(meal);
+            if (result == null) throw new NotExistStorageException();
+            log.debug("Updated meal with id {}", id);
         }
+        log.info("Redirecting to the meals list page");
         response.sendRedirect("meals");
     }
 }
