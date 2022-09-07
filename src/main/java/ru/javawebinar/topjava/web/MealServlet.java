@@ -19,8 +19,15 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealServlet extends HttpServlet {
     private static final int CALORIES_LIMIT = 2000;
-    private final Logger log = getLogger(MealServlet.class);
-    private final MealStorage storage = new InMemoryMealStorage();
+    private Logger log;
+    private MealStorage storage;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        this.log = getLogger(MealServlet.class);
+        this.storage = new InMemoryMealStorage();
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException,
