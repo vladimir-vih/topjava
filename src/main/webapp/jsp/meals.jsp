@@ -4,11 +4,12 @@
 <html>
 <head>
     <link rel="stylesheet" href="css/table.css">
-    <title>Meals</title>
+    <title>Meals List</title>
 </head>
 <body>
 <h3><a href="index.html">Home</a></h3>
 <h4><a href="meals?action=add">Add new meal</a></h4>
+<h2>Meals List:</h2>
 <div>
     <table>
         <tr>

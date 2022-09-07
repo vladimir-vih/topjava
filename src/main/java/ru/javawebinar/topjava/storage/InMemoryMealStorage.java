@@ -19,7 +19,7 @@ public class InMemoryMealStorage implements MealStorage {
 
     @Override
     public Meal add(Meal m) {
-        Integer id = currentId.incrementAndGet();
+        int id = currentId.incrementAndGet();
         m.setId(id);
         storage.put(id, m);
         return m;
@@ -37,7 +37,7 @@ public class InMemoryMealStorage implements MealStorage {
 
     @Override
     public Meal update(Meal m) {
-        final Meal result = storage.put(m.getId(), m);
+        final Meal result = storage.replace(m.getId(), m);
         return result == null ? null : m;
     }
 

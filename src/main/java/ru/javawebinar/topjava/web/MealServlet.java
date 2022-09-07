@@ -13,6 +13,7 @@ import javax.servlet.http.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -26,14 +27,15 @@ public class MealServlet extends HttpServlet {
             IOException, WrongRequestParameters {
         String action = request.getParameter("action");
         if (action != null) {
-            Integer id;
             switch (action) {
                 case "add":
                     log.debug("Got request to ADD new meal");
+                    request.setAttribute("meal",
+                            new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 0));
                     request.getRequestDispatcher("/jsp/editMeal.jsp").forward(request, response);
                     return;
-                case "edit":
-                    id = getIntParam(request, "id");
+                case "edit": {
+                    int id = getIntParam(request, "id");
                     log.debug("Got request to EDIT meal with id {}", id);
                     Meal meal = storage.get(id);
                     if (meal == null) throw new NotExistStorageException();
@@ -41,13 +43,15 @@ public class MealServlet extends HttpServlet {
                     log.debug("Added meal {} to the request. Start forwarding to edit page", id);
                     request.getRequestDispatcher("/jsp/editMeal.jsp").forward(request, response);
                     return;
-                case "delete":
-                    id = getIntParam(request, "id");
+                }
+                case "delete": {
+                    int id = getIntParam(request, "id");
                     log.debug("Got request to DELETE meal with id {}", id);
                     if (!storage.delete(id)) throw new NotExistStorageException();
                     log.debug("Meal id: {} deleted", id);
                     response.sendRedirect("meals");
                     return;
+                }
                 default:
                     log.debug("Got unknown action. redirect to meals list");
                     response.sendRedirect("meals");
@@ -61,7 +65,7 @@ public class MealServlet extends HttpServlet {
         request.getRequestDispatcher("/jsp/meals.jsp").forward(request, response);
     }
 
-    private Integer getIntParam(HttpServletRequest request, String name) throws WrongRequestParameters {
+    private int getIntParam(HttpServletRequest request, String name) throws WrongRequestParameters {
         int integer;
         try {
             integer = Integer.parseInt(request.getParameter(name));

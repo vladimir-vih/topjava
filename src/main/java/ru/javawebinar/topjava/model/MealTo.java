@@ -2,7 +2,7 @@ package ru.javawebinar.topjava.model;
 
 import java.time.LocalDateTime;
 
-public class MealTo implements Comparable<MealTo> {
+public class MealTo {
     private final Integer id;
     private final LocalDateTime dateTime;
     private final String description;
@@ -45,10 +45,5 @@ public class MealTo implements Comparable<MealTo> {
 
     public Integer getId() {
         return id;
-    }
-
-    @Override
-    public int compareTo(MealTo meal) {
-        return this.dateTime.compareTo(meal.getDateTime());
     }
 }
