@@ -3,15 +3,23 @@ package ru.javawebinar.topjava.repository.inmemory;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.util.DateTimeFilterEnum;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
-import ru.javawebinar.topjava.web.SecurityUtil;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+
+import static ru.javawebinar.topjava.util.DateTimeFilterEnum.*;
+import static ru.javawebinar.topjava.util.DateTimeUtil.*;
 
 @Repository
 public class InMemoryMealRepository implements MealRepository {
@@ -19,7 +27,7 @@ public class InMemoryMealRepository implements MealRepository {
     private final AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.meals.forEach(meal -> this.save(meal, SecurityUtil.authUserId()));
+        MealsUtil.meals.forEach(meal -> this.save(meal, meal.getUserId()));
     }
 
     @Override
@@ -60,6 +68,24 @@ public class InMemoryMealRepository implements MealRepository {
                 .parallel()
                 .filter(meal -> userId == meal.getUserId())
                 .sorted(Comparator.comparing(Meal::getDate))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Meal> getFilteredByDateTime(int userId, Map<DateTimeFilterEnum, String> filter) {
+        LocalDateTime dateFrom = filter.containsKey(DATE_FROM) ?
+                LocalDate.parse(filter.get(DATE_FROM), DATE_FORMATTER).atStartOfDay() : LocalDateTime.MIN;
+        LocalDateTime dateTo = filter.containsKey(DATE_TO) ?
+                LocalDate.parse(filter.get(DATE_TO), DATE_FORMATTER).atStartOfDay().plusDays(1) : LocalDateTime.MAX;
+        LocalTime timeFrom = filter.containsKey(TIME_FROM) ?
+                LocalTime.parse(filter.get(TIME_FROM), TIME_FORMATTER) : LocalTime.MIN;
+        LocalTime timeTo = filter.containsKey(TIME_TO) ?
+                LocalTime.parse(filter.get(TIME_TO), TIME_FORMATTER) : LocalTime.MAX;
+        Collection<Meal> meals = getAll(userId);
+        return meals.stream()
+                .parallel()
+                .filter(meal -> DateTimeUtil.isBetweenHalfOpen(meal.getDateTime(), dateFrom, dateTo))
+                .filter(meal -> DateTimeUtil.isBetweenHalfOpen(meal.getTime(), timeFrom, timeTo))
                 .collect(Collectors.toList());
     }
 }
