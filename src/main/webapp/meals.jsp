@@ -25,17 +25,18 @@
     <br><br>
     <br><br>
     <form method="get" action="meals">
+        <input type="hidden" name="action" value="filter">
         <label>От даты (включая):
-            <input type="date" name="dateFrom">
+            <input type="date" name="dateFrom" value="${param.dateFrom}">
         </label>
         <label>До даты (включая):
-            <input type="date" name="dateTo">
+            <input type="date" name="dateTo" value="${param.dateTo}">
         </label>
         <label>От времени (включая):
-            <input type="time" name="timeFrom">
+            <input type="time" name="timeFrom" value="${param.timeFrom}">
         </label>
         <label>До времени (исключая):
-            <input type="time" name="timeTo">
+            <input type="time" name="timeTo" value="${param.timeTo}">
         </label>
         <br><br>
         <button type="submit">Применить фильтр</button>

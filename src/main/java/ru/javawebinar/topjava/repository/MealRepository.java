@@ -1,11 +1,9 @@
 package ru.javawebinar.topjava.repository;
 
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.util.DateTimeFilterEnum;
 
-import java.util.Collection;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 public interface MealRepository {
     // null if updated meal does not belong to userId
@@ -18,7 +16,7 @@ public interface MealRepository {
     Meal get(int mealId, int userId);
 
     // ORDERED dateTime desc
-    Collection<Meal> getAll(int userId);
+    List<Meal> getAll(int userId);
 
-    List<Meal> getFilteredByDateTime(int userId, Map<DateTimeFilterEnum, String> filter);
+    List<Meal> getFilteredByDateTime(int userId, LocalDateTime dateFrom, LocalDateTime dateTo);
 }

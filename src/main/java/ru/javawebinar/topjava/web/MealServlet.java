@@ -1,11 +1,9 @@
 package ru.javawebinar.topjava.web;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.util.StringUtils;
 import ru.javawebinar.topjava.model.Meal;
-import ru.javawebinar.topjava.util.DateTimeFilterEnum;
 import ru.javawebinar.topjava.web.meal.MealRestController;
 
 import javax.servlet.ServletException;
@@ -13,13 +11,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
 
 public class MealServlet extends HttpServlet {
-    private static final Logger log = LoggerFactory.getLogger(MealServlet.class);
-
     private MealRestController controller;
 
     private ConfigurableApplicationContext appCtx;
@@ -40,12 +38,8 @@ public class MealServlet extends HttpServlet {
         String idString = request.getParameter("id");
         if (idString.isEmpty()) {
             controller.create(meal);
-            log.info("Create {}", meal);
         } else {
-            int id = Integer.parseInt(idString);
-            meal.setId(id);
-            controller.update(id, meal);
-            log.info("Update {}", meal);
+            controller.update(Integer.parseInt(idString), meal);
         }
         response.sendRedirect("meals");
     }
@@ -55,52 +49,50 @@ public class MealServlet extends HttpServlet {
         String action = request.getParameter("action");
         switch (action == null ? "all" : action) {
             case "delete":
-                int id = getId(request);
-                log.info("Delete id={}", id);
-                controller.delete(id);
+                controller.delete(Integer.parseInt(request.getParameter("id")));
                 response.sendRedirect("meals");
                 return;
             case "create": {
-                final Meal meal = controller.create(new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES),
-                        "", 1000));
+                final Meal meal = controller.create(new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000));
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 return;
             }
             case "update": {
-                final Meal meal = controller.get(getId(request));
-                request.setAttribute("meal", meal);
+                request.setAttribute("meal", controller.get(Integer.parseInt(request.getParameter("id"))));
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 return;
             }
-
-            case "all":
-            default:
-                Map<DateTimeFilterEnum, String> filter = new EnumMap<>(DateTimeFilterEnum.class);
-                for (DateTimeFilterEnum item : DateTimeFilterEnum.values()) {
-                    String paramString = request.getParameter(item.getParamName());
-                    if (paramString != null && !paramString.trim().isEmpty()) filter.put(item, paramString);
-                }
-                if (filter.size() == 0) {
-                    log.info("getAll");
-                    request.setAttribute("meals", controller.getAll());
-                } else {
-                    log.info("getAll filtered by date/time");
-                    request.setAttribute("meals", controller.getAllFiltered(filter));
-                }
+            case "filter": {
+                request.setAttribute("meals", controller.getAllFiltered(getDate(request, "dateFrom"),
+                        getDate(request, "dateTo"), getTime(request, "timeFrom"),
+                        getTime(request, "timeTo")));
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;
+            }
+            case "all":
+            default: {
+                request.setAttribute("meals", controller.getAll());
+                request.getRequestDispatcher("/meals.jsp").forward(request, response);
+                break;
+            }
         }
+    }
+
+    private LocalDate getDate(HttpServletRequest request, String name) {
+        String dateString = request.getParameter(name);
+        return StringUtils.hasLength(dateString) ?
+                LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE) : null;
+    }
+
+    private LocalTime getTime(HttpServletRequest request, String name) {
+        String timeString = request.getParameter(name);
+        return StringUtils.hasLength(timeString) ?
+                LocalTime.parse(timeString, DateTimeFormatter.ISO_LOCAL_TIME) : null;
     }
 
     @Override
     public void destroy() {
-        super.destroy();
         appCtx.close();
-    }
-
-    private int getId(HttpServletRequest request) {
-        String paramId = Objects.requireNonNull(request.getParameter("id"));
-        return Integer.parseInt(paramId);
     }
 }

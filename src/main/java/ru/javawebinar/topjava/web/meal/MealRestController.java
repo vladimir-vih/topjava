@@ -7,13 +7,16 @@ import org.springframework.stereotype.Controller;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealTo;
-import ru.javawebinar.topjava.util.DateTimeFilterEnum;
 import ru.javawebinar.topjava.util.MealsUtil;
-import ru.javawebinar.topjava.util.exception.UnAuthorizedAccessException;
 import ru.javawebinar.topjava.web.SecurityUtil;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
+
+import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
 
 @Controller
 public class MealRestController {
@@ -22,28 +25,31 @@ public class MealRestController {
     private MealService service;
 
     public Meal create(Meal meal) {
+        Objects.requireNonNull(meal, "Got NULL meal in the CREATE request");
         int userId = SecurityUtil.authUserId();
         log.info("The request to create the meal for the user {}", userId);
+        checkNew(meal);
         return service.create(meal, userId);
     }
 
-    public Meal get(int mealId) {
+    public Meal get(Integer mealId) {
+        Objects.requireNonNull(mealId, "Got NULL meal ID in the GET request");
         int userId = SecurityUtil.authUserId();
         log.info("The request to get the meal {} for the user {}", mealId, userId);
         return service.get(mealId, userId);
     }
 
-    public void update(int mealId, Meal meal) {
+    public void update(Integer mealId, Meal meal) {
+        Objects.requireNonNull(mealId, "Got NULL meal ID in the UPDATE request");
+        Objects.requireNonNull(meal, "Got NULL meal in the UPDATE request");
         int userId = SecurityUtil.authUserId();
-        log.info("The request to update the meal {} for the user {}", meal.getId(), userId);
-        if (userId != meal.getUserId()) {
-            log.debug("User {} is not authorized to access the meal {}", userId, mealId);
-            throw new UnAuthorizedAccessException("User " + userId + " is not authorized to access the meal " + mealId);
-        }
+        log.info("The request to update the meal {} for the user {}", mealId, userId);
+        meal.setId(mealId);
         service.update(meal, userId);
     }
 
-    public void delete(int mealId) {
+    public void delete(Integer mealId) {
+        Objects.requireNonNull(mealId, "Got NULL meal ID in the DELETE request");
         int userId = SecurityUtil.authUserId();
         log.info("The request to delete the meal {} for the user {}", mealId, userId);
         service.delete(mealId, userId);
@@ -52,12 +58,18 @@ public class MealRestController {
     public List<MealTo> getAll() {
         int userId = SecurityUtil.authUserId();
         log.info("The request to get all the meals for the user {}", userId);
-        return MealsUtil.getTos(service.getAll(userId), MealsUtil.DEFAULT_CALORIES_PER_DAY);
+        return MealsUtil.getTos(service.getAll(userId), SecurityUtil.authUserCaloriesPerDay());
     }
 
-    public List<MealTo> getAllFiltered(Map<DateTimeFilterEnum, String> filter) {
+    public List<MealTo> getAllFiltered(LocalDate dateFromRaw, LocalDate dateToRaw, LocalTime timeFromRaw,
+                                       LocalTime timeToRaw) {
         int userId = SecurityUtil.authUserId();
         log.info("The request to get FILTERED meals for the user {}", userId);
-        return MealsUtil.getTos(service.getAllFiltered(userId, filter), MealsUtil.DEFAULT_CALORIES_PER_DAY);
+        final LocalDateTime dateFrom = dateFromRaw != null ? dateFromRaw.atStartOfDay() : LocalDateTime.MIN;
+        final LocalDateTime dateTo = dateToRaw != null ? dateToRaw.atStartOfDay().plusDays(1) : LocalDateTime.MAX;
+        final LocalTime timeFrom = timeFromRaw != null ? timeFromRaw : LocalTime.MIN;
+        final LocalTime timeTo = timeToRaw != null ? timeToRaw : LocalTime.MAX;
+        return MealsUtil.getFilteredTos(service.getAllFiltered(userId, dateFrom, dateTo),
+                SecurityUtil.authUserCaloriesPerDay(), timeFrom, timeTo);
     }
 }

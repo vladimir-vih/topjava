@@ -4,11 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
-import ru.javawebinar.topjava.util.DateTimeFilterEnum;
 
-import java.util.Collection;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.*;
 
@@ -18,7 +16,7 @@ public class MealService {
     private MealRepository repository;
 
     public Meal create(Meal meal, int userId) {
-        checkNew(meal);
+        meal.setUserId(userId);
         return repository.save(meal, userId);
     }
 
@@ -31,14 +29,14 @@ public class MealService {
     }
 
     public void delete(int mealId, int userId) {
-        checkNotFound(repository.delete(mealId, userId), String.valueOf(mealId));
+        checkNotFoundWithId(repository.delete(mealId, userId), mealId);
     }
 
-    public Collection<Meal> getAll(int userId) {
+    public List<Meal> getAll(int userId) {
         return repository.getAll(userId);
     }
 
-    public List<Meal> getAllFiltered(int userId, Map<DateTimeFilterEnum, String> filter) {
-        return repository.getFilteredByDateTime(userId, filter);
+    public List<Meal> getAllFiltered(int userId, LocalDateTime dateFrom, LocalDateTime dateTo) {
+        return repository.getFilteredByDateTime(userId, dateFrom, dateTo);
     }
 }
