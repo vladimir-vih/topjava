@@ -16,16 +16,18 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
 
+import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
 
 @Controller
 public class MealRestController {
     private final Logger log = LoggerFactory.getLogger(getClass());
+
     @Autowired
     private MealService service;
 
     public Meal create(Meal meal) {
-        Objects.requireNonNull(meal, "Got NULL meal in the CREATE request");
+        checkArgsNonNull("CREATE", meal);
         int userId = SecurityUtil.authUserId();
         log.info("The request to create the meal for the user {}", userId);
         checkNew(meal);
@@ -33,26 +35,31 @@ public class MealRestController {
     }
 
     public Meal get(Integer mealId) {
-        Objects.requireNonNull(mealId, "Got NULL meal ID in the GET request");
+        checkArgsNonNull("GET", mealId);
         int userId = SecurityUtil.authUserId();
         log.info("The request to get the meal {} for the user {}", mealId, userId);
         return service.get(mealId, userId);
     }
 
     public void update(Integer mealId, Meal meal) {
-        Objects.requireNonNull(mealId, "Got NULL meal ID in the UPDATE request");
-        Objects.requireNonNull(meal, "Got NULL meal in the UPDATE request");
+        checkArgsNonNull("UPDATE", mealId, meal);
         int userId = SecurityUtil.authUserId();
         log.info("The request to update the meal {} for the user {}", mealId, userId);
-        meal.setId(mealId);
+        assureIdConsistent(meal, mealId);
         service.update(meal, userId);
     }
 
     public void delete(Integer mealId) {
-        Objects.requireNonNull(mealId, "Got NULL meal ID in the DELETE request");
+        checkArgsNonNull("DELETE", mealId);
         int userId = SecurityUtil.authUserId();
         log.info("The request to delete the meal {} for the user {}", mealId, userId);
         service.delete(mealId, userId);
+    }
+
+    private void checkArgsNonNull(String methodName, Object... args) {
+        for (Object o : args) {
+            Objects.requireNonNull(o, "Got NULL object in the " + methodName + " method");
+        }
     }
 
     public List<MealTo> getAll() {

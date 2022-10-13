@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 public class MealServlet extends HttpServlet {
     private MealRestController controller;
@@ -33,8 +34,7 @@ public class MealServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         Meal meal = new Meal(null, LocalDateTime.parse(request.getParameter("dateTime")),
                 request.getParameter("description"),
-                Integer.parseInt(request.getParameter("calories")),
-                Integer.parseInt(request.getParameter("userId")));
+                Integer.parseInt(request.getParameter("calories")));
         String idString = request.getParameter("id");
         if (idString.isEmpty()) {
             controller.create(meal);
@@ -49,17 +49,17 @@ public class MealServlet extends HttpServlet {
         String action = request.getParameter("action");
         switch (action == null ? "all" : action) {
             case "delete":
-                controller.delete(Integer.parseInt(request.getParameter("id")));
+                controller.delete(getId(request));
                 response.sendRedirect("meals");
                 return;
             case "create": {
-                final Meal meal = controller.create(new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000));
-                request.setAttribute("meal", meal);
+                request.setAttribute("meal", new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES),
+                        "", 1000));
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 return;
             }
             case "update": {
-                request.setAttribute("meal", controller.get(Integer.parseInt(request.getParameter("id"))));
+                request.setAttribute("meal", controller.get(getId(request)));
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 return;
             }
@@ -77,6 +77,11 @@ public class MealServlet extends HttpServlet {
                 break;
             }
         }
+    }
+
+    private int getId(HttpServletRequest request) {
+        String paramId = Objects.requireNonNull(request.getParameter("id"));
+        return Integer.parseInt(paramId);
     }
 
     private LocalDate getDate(HttpServletRequest request, String name) {

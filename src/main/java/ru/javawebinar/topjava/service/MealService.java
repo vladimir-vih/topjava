@@ -16,7 +16,6 @@ public class MealService {
     private MealRepository repository;
 
     public Meal create(Meal meal, int userId) {
-        meal.setUserId(userId);
         return repository.save(meal, userId);
     }
 
