@@ -53,8 +53,7 @@ public class MealServlet extends HttpServlet {
                 response.sendRedirect("meals");
                 return;
             case "create": {
-                request.setAttribute("meal", new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES),
-                        "", 1000));
+                request.setAttribute("meal", new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000));
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 return;
             }

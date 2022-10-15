@@ -21,40 +21,41 @@ public class InMemoryMealRepository implements MealRepository {
     private final AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.meals.forEach(meal -> {
-            switch (meal.getDate().getDayOfMonth()) {
-                case 30:
-                    save(meal, 1);
-                    break;
-                case 31:
-                    save(meal, 2);
-                    break;
-            }
-        });
+        MealsUtil.meals1.forEach(meal -> save(meal, 1));
+        MealsUtil.meals2.forEach(meal -> save(meal, 2));
     }
 
     @Override
     public Meal save(Meal meal, int userId) {
         AtomicReference<Meal> mealRef = new AtomicReference<>();
-        repository.compute(userId, (userIdKey, userMeals) -> {
-            if (userMeals == null) userMeals = new ConcurrentHashMap<>();
-            if (meal.isNew()) meal.setId(counter.incrementAndGet());
-            userMeals.put(meal.getId(), meal);
-            mealRef.set(meal);
-            return userMeals;
-        });
+        if (meal.isNew()) {
+            meal.setId(counter.incrementAndGet());
+            Map<Integer, Meal> userMeals = repository.get(userId);
+            if (userMeals == null) {
+                userMeals = new ConcurrentHashMap<>();
+                repository.put(userId, userMeals);
+            }
+            userMeals.computeIfAbsent(meal.getId(),
+                    (mealId) -> {
+                        mealRef.set(meal);
+                        return meal;
+                    });
+        } else {
+            repository.get(userId).computeIfPresent(meal.getId(),
+                    (mealId, oldMeal) -> {
+                        mealRef.set(meal);
+                        return meal;
+                    });
+        }
         return mealRef.get();
     }
 
     @Override
     public boolean delete(int mealId, int userId) {
         AtomicBoolean result = new AtomicBoolean(false);
-        repository.computeIfPresent(userId, (userIdKey, userMeals) -> {
-            userMeals.computeIfPresent(mealId, (id, meal) -> {
-                result.set(true);
-                return null;
-            });
-            return userMeals;
+        repository.get(userId).computeIfPresent(mealId, (id, meal) -> {
+            result.set(true);
+            return null;
         });
         return result.get();
     }
@@ -62,8 +63,7 @@ public class InMemoryMealRepository implements MealRepository {
     @Override
     public Meal get(int mealId, int userId) {
         Map<Integer, Meal> userMeals = repository.get(userId);
-        if (userMeals == null) return null;
-        return userMeals.get(mealId);
+        return userMeals == null ? null : userMeals.get(mealId);
     }
 
     @Override

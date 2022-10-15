@@ -34,14 +34,14 @@ public class MealRestController {
         return service.create(meal, userId);
     }
 
-    public Meal get(Integer mealId) {
+    public Meal get(int mealId) {
         checkArgsNonNull("GET", mealId);
         int userId = SecurityUtil.authUserId();
         log.info("The request to get the meal {} for the user {}", mealId, userId);
         return service.get(mealId, userId);
     }
 
-    public void update(Integer mealId, Meal meal) {
+    public void update(int mealId, Meal meal) {
         checkArgsNonNull("UPDATE", mealId, meal);
         int userId = SecurityUtil.authUserId();
         log.info("The request to update the meal {} for the user {}", mealId, userId);
@@ -49,7 +49,7 @@ public class MealRestController {
         service.update(meal, userId);
     }
 
-    public void delete(Integer mealId) {
+    public void delete(int mealId) {
         checkArgsNonNull("DELETE", mealId);
         int userId = SecurityUtil.authUserId();
         log.info("The request to delete the meal {} for the user {}", mealId, userId);
