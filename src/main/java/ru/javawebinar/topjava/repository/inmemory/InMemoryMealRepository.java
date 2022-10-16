@@ -27,37 +27,24 @@ public class InMemoryMealRepository implements MealRepository {
 
     @Override
     public Meal save(Meal meal, int userId) {
-        AtomicReference<Meal> mealRef = new AtomicReference<>();
         if (meal.isNew()) {
-            meal.setId(counter.incrementAndGet());
             Map<Integer, Meal> userMeals = repository.get(userId);
             if (userMeals == null) {
                 userMeals = new ConcurrentHashMap<>();
-                repository.put(userId, userMeals);
+                if (repository.putIfAbsent(userId, userMeals) != null) return null;
             }
-            userMeals.computeIfAbsent(meal.getId(),
-                    (mealId) -> {
-                        mealRef.set(meal);
-                        return meal;
-                    });
+            meal.setId(counter.incrementAndGet());
+            userMeals.put(meal.getId(), meal);
         } else {
-            repository.get(userId).computeIfPresent(meal.getId(),
-                    (mealId, oldMeal) -> {
-                        mealRef.set(meal);
-                        return meal;
-                    });
+            if (repository.get(userId).computeIfPresent(meal.getId(), (mealId, oldMeal) -> meal) == null) return null;
         }
-        return mealRef.get();
+        return meal;
     }
 
     @Override
     public boolean delete(int mealId, int userId) {
-        AtomicBoolean result = new AtomicBoolean(false);
-        repository.get(userId).computeIfPresent(mealId, (id, meal) -> {
-            result.set(true);
-            return null;
-        });
-        return result.get();
+        Map<Integer, Meal> userMeals = repository.get(userId);
+        return userMeals != null && userMeals.remove(mealId) != null;
     }
 
     @Override

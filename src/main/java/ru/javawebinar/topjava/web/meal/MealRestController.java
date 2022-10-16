@@ -35,14 +35,13 @@ public class MealRestController {
     }
 
     public Meal get(int mealId) {
-        checkArgsNonNull("GET", mealId);
         int userId = SecurityUtil.authUserId();
         log.info("The request to get the meal {} for the user {}", mealId, userId);
         return service.get(mealId, userId);
     }
 
     public void update(int mealId, Meal meal) {
-        checkArgsNonNull("UPDATE", mealId, meal);
+        checkArgsNonNull("UPDATE", meal);
         int userId = SecurityUtil.authUserId();
         log.info("The request to update the meal {} for the user {}", mealId, userId);
         assureIdConsistent(meal, mealId);
@@ -50,7 +49,6 @@ public class MealRestController {
     }
 
     public void delete(int mealId) {
-        checkArgsNonNull("DELETE", mealId);
         int userId = SecurityUtil.authUserId();
         log.info("The request to delete the meal {} for the user {}", mealId, userId);
         service.delete(mealId, userId);
