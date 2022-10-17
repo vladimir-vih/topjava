@@ -7,11 +7,12 @@ import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -27,16 +28,15 @@ public class InMemoryMealRepository implements MealRepository {
 
     @Override
     public Meal save(Meal meal, int userId) {
+        Map<Integer, Meal> userMeals = repository.get(userId);
+        if (userMeals == null) {
+            userMeals = repository.computeIfAbsent(userId, (meals) -> new ConcurrentHashMap<>());
+        }
         if (meal.isNew()) {
-            Map<Integer, Meal> userMeals = repository.get(userId);
-            if (userMeals == null) {
-                userMeals = new ConcurrentHashMap<>();
-                if (repository.putIfAbsent(userId, userMeals) != null) return null;
-            }
             meal.setId(counter.incrementAndGet());
             userMeals.put(meal.getId(), meal);
         } else {
-            if (repository.get(userId).computeIfPresent(meal.getId(), (mealId, oldMeal) -> meal) == null) return null;
+            if (userMeals.computeIfPresent(meal.getId(), (mealId, oldMeal) -> meal) == null) return null;
         }
         return meal;
     }
