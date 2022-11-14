@@ -64,7 +64,7 @@ public class MealServiceTest {
     @Test
     public void getExist() {
         log.info("do getExist");
-        assertMatch(service.get(ID_MEAL1_OF_USER, USER_ID), MEAL1_OF_USER);
+        assertMatch(service.get(ID_MEAL1_OF_USER, USER_ID), meal1User);
     }
 
     @Test(expected = NotFoundException.class)
@@ -99,34 +99,34 @@ public class MealServiceTest {
 
     @Test
     public void getBetweenInclusiveEmptyResult() {
-        assertEquals(0, service.getBetweenInclusive(CHECK_DATE, CHECK_DATE, USER_ID).size());
+        assertEquals(0, service.getBetweenInclusive(checkDate, checkDate, USER_ID).size());
     }
 
     @Test
     public void getBetweenInclusiveThreeDaysResult() {
-        assertEquals(3, service.getBetweenInclusive(CHECK_DATE, CHECK_DATE, ADMIN_ID).size());
+        assertEquals(3, service.getBetweenInclusive(checkDate, checkDate, ADMIN_ID).size());
     }
 
     @Test
     public void getAll() {
-        List<Meal> expectedList = Arrays.asList(MEAL3_OF_USER, MEAL2_OF_USER, MEAL1_OF_USER);
+        List<Meal> expectedList = Arrays.asList(meal3User, meal2User, meal1User);
         assertEquals(expectedList, service.getAll(USER_ID));
     }
 
     @Test
     public void updateExist() {
-        service.update(UPDATED_MEAL_OF_USER, USER_ID);
-        assertMatch(service.get(ID_MEAL3_OF_USER, USER_ID), UPDATED_MEAL_OF_USER);
+        service.update(updateMealOfUser, USER_ID);
+        assertMatch(service.get(ID_MEAL3_OF_USER, USER_ID), updateMealOfUser);
     }
 
     @Test(expected = NotFoundException.class)
     public void updateNotExist() {
-        service.update(NOT_ADDED_MEAL, USER_ID);
+        service.update(notAddedMeal, USER_ID);
     }
 
     @Test(expected = NotFoundException.class)
     public void updateMealOfOtherUser() {
-        service.update(MEAL1_ADMIN, USER_ID);
+        service.update(meal1Admin, USER_ID);
     }
 
     @Test
@@ -140,12 +140,12 @@ public class MealServiceTest {
     @Test(expected = DataAccessException.class)
     public void createDuplicateDate() {
         final Meal duplicatedDateMeal = MealTestData.getNew();
-        duplicatedDateMeal.setDateTime(LocalDateTime.of(CHECK_DATE, LocalTime.of(14,00)));
+        duplicatedDateMeal.setDateTime(LocalDateTime.of(checkDate, LocalTime.of(14,0)));
         service.create(duplicatedDateMeal, ADMIN_ID);
     }
 
     @Test
     public void createMealForOtherUser() {
-        assertNull(service.create(MEAL1_OF_USER, ADMIN_ID));
+        assertNull(service.create(meal1User, ADMIN_ID));
     }
 }
