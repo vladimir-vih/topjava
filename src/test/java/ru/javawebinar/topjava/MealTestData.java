@@ -47,7 +47,7 @@ public class MealTestData {
         return new Meal(LocalDateTime.of(2020, 1, 29, 22, 0, 0), "New Meal", 999);
     }
 
-    public static Meal getUpdated(){
+    public static Meal getUpdated() {
         return new Meal(ID_MEAL3_OF_USER, LocalDateTime.of(checkDate.minusDays(1),
                 LocalTime.of(20, 0, 0)), "Ужин NEW!!!", 500);
     }
