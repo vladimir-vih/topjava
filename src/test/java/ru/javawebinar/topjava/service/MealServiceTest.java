@@ -51,7 +51,7 @@ public class MealServiceTest {
     @Test
     public void getNotExist() {
         log.info("do getNotExist");
-        assertThrows(NotFoundException.class, () -> service.get(TO_ADD_MEAL_ID, USER_ID));
+        assertThrows(NotFoundException.class, () -> service.get(NOT_EXIST_MEAL_ID, USER_ID));
     }
 
     @Test
@@ -70,7 +70,7 @@ public class MealServiceTest {
     @Test
     public void deleteNotExist() {
         log.info("do deleteNotExist");
-        assertThrows(NotFoundException.class, () -> service.delete(TO_ADD_MEAL_ID, USER_ID));
+        assertThrows(NotFoundException.class, () -> service.delete(NOT_EXIST_MEAL_ID, USER_ID));
     }
 
     @Test
@@ -110,18 +110,22 @@ public class MealServiceTest {
 
     @Test
     public void updateNotExist() {
-        assertThrows(NotFoundException.class, () -> service.update(notAddedMeal, USER_ID));
+        Meal testMeal = getNew();
+        testMeal.setId(NOT_EXIST_MEAL_ID);
+        assertThrows(NotFoundException.class, () -> service.update(testMeal, USER_ID));
     }
 
     @Test
     public void updateMealOfOtherUser() {
-        assertThrows(NotFoundException.class, () -> service.update(meal1Admin, USER_ID));
+        assertThrows(NotFoundException.class, () -> service.update(getUpdated(), ADMIN_ID));
     }
 
     @Test
     public void createCorrect() {
-        service.create(getNew(), USER_ID);
-        assertMatchIgnoreId(service.get(TO_ADD_MEAL_ID, USER_ID), getNew());
+        Meal expectedMeal = getNew();
+        expectedMeal.setId(NOT_EXIST_MEAL_ID);
+        assertMatch(service.create(getNew(), USER_ID), expectedMeal);
+        assertMatch(service.get(NOT_EXIST_MEAL_ID, USER_ID), expectedMeal);
     }
 
     @Test

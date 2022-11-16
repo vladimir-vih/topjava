@@ -19,7 +19,7 @@ public class MealTestData {
     public static final int ID_MEAL1_OF_ADMIN = ID_MEAL5_OF_USER + 1;
     public static final int ID_MEAL2_OF_ADMIN = ID_MEAL1_OF_ADMIN + 1;
     public static final int ID_MEAL3_OF_ADMIN = ID_MEAL2_OF_ADMIN + 1;
-    public static final int TO_ADD_MEAL_ID = ID_MEAL3_OF_ADMIN + 1;
+    public static final int NOT_EXIST_MEAL_ID = ID_MEAL3_OF_ADMIN + 1;
     public static final LocalDate checkDate = LocalDate.of(2020, 1, 31);
 
     public static final Meal meal1User = new Meal(ID_MEAL1_OF_USER, LocalDateTime.of(checkDate.minusDays(1),
@@ -40,19 +40,20 @@ public class MealTestData {
     public static final Meal meal3Admin = new Meal(ID_MEAL3_OF_ADMIN, LocalDateTime.of(checkDate,
             LocalTime.of(19, 0, 0)), "Ужин", 450);
 
-    public static final Meal notAddedMeal = new Meal(TO_ADD_MEAL_ID, LocalDateTime.of(checkDate.minusDays(60),
+    public static final Meal notExistMeal = new Meal(NOT_EXIST_MEAL_ID, LocalDateTime.of(checkDate.minusDays(60),
             LocalTime.of(0, 0, 0)), "FAKE MEAL!!!", 666);
 
     public static Meal getNew() {
         return new Meal(LocalDateTime.of(2020, 1, 29, 22, 0, 0), "New Meal", 999);
     }
 
-    public static void assertMatch(Meal actual, Meal expected) {
-        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+    public static Meal getUpdated(){
+        return new Meal(ID_MEAL3_OF_USER, LocalDateTime.of(checkDate.minusDays(1),
+                LocalTime.of(20, 0, 0)), "Ужин NEW!!!", 500);
     }
 
-    public static void assertMatchIgnoreId(Meal actual, Meal expected) {
-        assertThat(actual).usingRecursiveComparison().ignoringFields("id").isEqualTo(expected);
+    public static void assertMatch(Meal actual, Meal expected) {
+        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
 
     public static void assertMatch(Iterable<Meal> actual, Meal... expected) {
@@ -61,10 +62,5 @@ public class MealTestData {
 
     public static void assertMatch(Iterable<Meal> actual, Iterable<Meal> expected) {
         assertThat(actual).usingRecursiveFieldByFieldElementComparator().isEqualTo(expected);
-    }
-
-    public static Meal getUpdated(){
-        return new Meal(ID_MEAL3_OF_USER, LocalDateTime.of(checkDate.minusDays(1),
-                LocalTime.of(20, 0, 0)), "Ужин NEW!!!", 500);
     }
 }
