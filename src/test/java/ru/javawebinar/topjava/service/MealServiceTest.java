@@ -20,7 +20,7 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -36,53 +36,45 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
-    private static final Map<String, Long> TEST_DURATION_MAP = new HashMap<>();
+    private static final Map<String, Long> testDurationMap = new LinkedHashMap<>();
     private static final Logger logger = LoggerFactory.getLogger(MealServiceTest.class);
 
-    private static void logInfo(Description description, String status, long nanos) {
-        String testName = description.getMethodName();
-
-        logger.info("Test {} {}, spent {} milliseconds",
-                testName, status, TimeUnit.NANOSECONDS.toMillis(nanos));
-    }
-
-    private static void putTimeToMap(Description description, long nanos){
-        TEST_DURATION_MAP.put(description.getMethodName(),TimeUnit.NANOSECONDS.toMillis(nanos));
-    }
+    @Autowired
+    private MealService service;
 
     @Rule
     public Stopwatch stopwatch = new Stopwatch() {
         @Override
         protected void succeeded(long nanos, Description description) {
-            putTimeToMap(description, nanos);
-            logInfo(description, "succeeded", nanos);
+            logInfo(description, nanos);
         }
 
         @Override
         protected void failed(long nanos, Throwable e, Description description) {
-            putTimeToMap(description, nanos);
-            logInfo(description, "failed", nanos);
+            logInfo(description, nanos);
         }
 
         @Override
         protected void skipped(long nanos, AssumptionViolatedException e, Description description) {
-            putTimeToMap(description, nanos);
-            logInfo(description, "skipped", nanos);
+            logInfo(description, nanos);
+        }
+
+        private void logInfo(Description description, long nanos) {
+            long ms = TimeUnit.NANOSECONDS.toMillis(nanos);
+            String testName = description.getMethodName();
+            testDurationMap.put(testName, ms);
+            logger.info("Test {} spent {} ms", testName, ms);
         }
     };
 
     @AfterClass
-    public static void afterClass(){
-        for (Map.Entry<String, Long> entry : TEST_DURATION_MAP.entrySet()){
-            /*logger.info(String.format("Time spent in test %s is %d milliseconds", entry.getKey(),
-                    entry.getValue()));*/
-            logger.info("Time spent in test {} is {} milliseconds", entry.getKey(),
-                    entry.getValue());
+    public static void afterClass() {
+        StringBuilder sb = new StringBuilder().append("All tests time info:");
+        for (Map.Entry<String, Long> entry : testDurationMap.entrySet()) {
+            sb.append(String.format("%n%-25s %d ms", entry.getKey(), entry.getValue()));
         }
+        logger.info(sb.toString());
     }
-
-    @Autowired
-    private MealService service;
 
     @Test
     public void delete() {

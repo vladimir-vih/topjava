@@ -5,28 +5,47 @@ import org.hibernate.validator.constraints.Range;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "meals")
+@Table(name = "meals", indexes = {
+        @Index(name = "meals_unique_user_datetime_idx", columnList = "user_id, date_time", unique = true)
+})
+@NamedQueries({
+        @NamedQuery(name = Meal.GET, query = "SELECT m FROM Meal m WHERE m.id=:id AND m.user.id=:userId"),
+        @NamedQuery(name = Meal.GET_ALL, query = "SELECT m FROM Meal m WHERE m.user.id=:userId ORDER BY m.dateTime desc"),
+        @NamedQuery(name = Meal.GET_BETWEEN_HALFOPEN,
+                query = "SELECT m " +
+                        "FROM Meal m " +
+                        "WHERE m.user.id=:userId AND m.dateTime >=:startDate AND m.dateTime <:endDate " +
+                        "ORDER BY m.dateTime desc"),
+        @NamedQuery(name = Meal.DELETE, query = "DELETE FROM Meal m WHERE m.id=:id AND m.user.id=:userId")
+})
 public class Meal extends AbstractBaseEntity {
-    @NotNull
+    public static final String GET = "Meal.get";
+    public static final String GET_ALL = "Meal.getAll";
+    public static final String GET_BETWEEN_HALFOPEN = "Meal.getBetweenHalfOpen";
+    public static final String DELETE = "Meal.delete";
+
     @Column(name = "date_time", nullable = false, columnDefinition = "timestamp")
+    @NotNull
     private LocalDateTime dateTime;
 
-    @NotBlank
     @Column(name = "description", nullable = false, columnDefinition = "text")
+    @NotBlank
+    @Size(min = 1, max = 120)
     private String description;
 
-    @Range(min = 1, max = 100000)
     @Column(name = "calories", nullable = false)
+    @Range(min = 1, max = 100000)
     private int calories;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @NotNull
     private User user;
 
     public Meal() {
