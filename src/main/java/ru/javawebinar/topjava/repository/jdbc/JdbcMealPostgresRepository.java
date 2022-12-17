@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import java.time.LocalDateTime;
 
-public class JdbcMealPostgresRepository extends JdbcMealRepository<LocalDateTime> {
+public class JdbcMealPostgresRepository extends ProfiledJdbcMealRepository<LocalDateTime> {
     public JdbcMealPostgresRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         super(jdbcTemplate, namedParameterJdbcTemplate);
     }

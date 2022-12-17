@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-public class JdbcMealHsqldbRepository extends JdbcMealRepository<Timestamp> {
+public class JdbcMealHsqldbRepository extends ProfiledJdbcMealRepository<Timestamp> {
     public JdbcMealHsqldbRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         super(jdbcTemplate, namedParameterJdbcTemplate);
     }

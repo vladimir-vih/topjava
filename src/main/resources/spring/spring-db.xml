@@ -79,8 +79,6 @@
     </beans>
 
     <beans profile="jdbc_postgres">
-        <!--        <context:component-scan base-package="ru.javawebinar.**.repository.jdbc"/>-->
-
         <bean id="jdbcMealPostgresRepository" class="ru.javawebinar.topjava.repository.jdbc.JdbcMealPostgresRepository">
             <constructor-arg ref="jdbcTemplate"/>
             <constructor-arg ref="namedJdbcTemplate"/>
@@ -88,8 +86,6 @@
     </beans>
 
     <beans profile="jdbc_hsqldb">
-        <context:component-scan base-package="ru.javawebinar.**.repository.jdbc"/>
-
         <bean id="jdbcMealHsqldbRepository" class="ru.javawebinar.topjava.repository.jdbc.JdbcMealHsqldbRepository">
             <constructor-arg ref="jdbcTemplate"/>
             <constructor-arg ref="namedJdbcTemplate"/>
@@ -97,8 +93,6 @@
     </beans>
 
     <beans profile="jdbc_auto_choose_DB">
-        <context:component-scan base-package="ru.javawebinar.**.repository.jdbc"/>
-
         <bean id="jdbcMealAutoChooseDbRepository" class="ru.javawebinar.topjava.repository.jdbc.JdbcMealAutoChooseDbRepository">
             <constructor-arg ref="jdbcTemplate"/>
             <constructor-arg ref="namedJdbcTemplate"/>
@@ -106,7 +100,6 @@
     </beans>
 
     <beans profile="jdbc_common">
-
         <bean id="jdbcUserRepository" class="ru.javawebinar.topjava.repository.jdbc.JdbcUserRepository">
             <constructor-arg ref="jdbcTemplate"/>
             <constructor-arg ref="namedJdbcTemplate"/>
