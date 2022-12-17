@@ -52,7 +52,6 @@ abstract class MealServiceTest extends AbstractCommonServiceTest{
     }
 
     @Test
-    @Transactional
     public void duplicateDateTimeCreate() {
         assertThrows(DataAccessException.class, () ->
                 service.create(new Meal(null, meal1.getDateTime(), "duplicate", 100), USER_ID));
