@@ -8,26 +8,25 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Repository;
+import ru.javawebinar.topjava.Profiles;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Repository
-abstract class JdbcMealRepository<T> implements MealRepository {
+public class JdbcMealAutoChooseDbRepository implements MealRepository {
+    private static final RowMapper<Meal> ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
 
-    protected static final RowMapper<Meal> ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
+    private final JdbcTemplate jdbcTemplate;
 
-    protected final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    protected final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
-    protected final SimpleJdbcInsert insertMeal;
+    private final SimpleJdbcInsert insertMeal;
 
     @Autowired
-    public JdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public JdbcMealAutoChooseDbRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.insertMeal = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("meals")
                 .usingGeneratedKeyColumns("id");
@@ -84,5 +83,11 @@ abstract class JdbcMealRepository<T> implements MealRepository {
                 ROW_MAPPER, userId, getDateType(startDateTime), getDateType(endDateTime));
     }
 
-    protected abstract <T> T getDateType(LocalDateTime localDateTime);
+    private Object getDateType(LocalDateTime localDateTime) {
+        switch (Profiles.getActiveDbProfile()) {
+            case Profiles.POSTGRES_DB -> {return localDateTime;}
+            case Profiles.HSQL_DB -> {return Timestamp.valueOf(localDateTime);}
+            default -> throw new UnsupportedOperationException();
+        }
+    }
 }

@@ -25,7 +25,8 @@
         <property name="jpaPropertyMap">
             <map>
                 <entry key="#{T(org.hibernate.cfg.AvailableSettings).FORMAT_SQL}" value="${hibernate.format_sql}"/>
-                <entry key="#{T(org.hibernate.cfg.AvailableSettings).USE_SQL_COMMENTS}" value="${hibernate.use_sql_comments}"/>
+                <entry key="#{T(org.hibernate.cfg.AvailableSettings).USE_SQL_COMMENTS}"
+                       value="${hibernate.use_sql_comments}"/>
                 <entry key="#{T(org.hibernate.cfg.AvailableSettings).JPA_PROXY_COMPLIANCE}" value="false"/>
                 <!--<entry key="#{T(org.hibernate.cfg.AvailableSettings).HBM2DDL_AUTO}" value="${hibernate.hbm2ddl.auto}"/>-->
             </map>
@@ -43,8 +44,6 @@
     <!-- Transaction manager for a single JPA EntityManagerFactory (alternative to JTA) -->
     <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
           p:entityManagerFactory-ref="entityManagerFactory"/>
-
-
 
 
     <beans profile="hsqldb">
@@ -79,8 +78,40 @@
               p:password="${database.password}"/>
     </beans>
 
-    <beans profile="jdbc">
+    <beans profile="jdbc_postgres">
+        <!--        <context:component-scan base-package="ru.javawebinar.**.repository.jdbc"/>-->
+
+        <bean id="jdbcMealPostgresRepository" class="ru.javawebinar.topjava.repository.jdbc.JdbcMealPostgresRepository">
+            <constructor-arg ref="jdbcTemplate"/>
+            <constructor-arg ref="namedJdbcTemplate"/>
+        </bean>
+    </beans>
+
+    <beans profile="jdbc_hsqldb">
         <context:component-scan base-package="ru.javawebinar.**.repository.jdbc"/>
+
+        <bean id="jdbcMealHsqldbRepository" class="ru.javawebinar.topjava.repository.jdbc.JdbcMealHsqldbRepository">
+            <constructor-arg ref="jdbcTemplate"/>
+            <constructor-arg ref="namedJdbcTemplate"/>
+        </bean>
+    </beans>
+
+    <beans profile="jdbc_auto_choose_DB">
+        <context:component-scan base-package="ru.javawebinar.**.repository.jdbc"/>
+
+        <bean id="jdbcMealAutoChooseDbRepository" class="ru.javawebinar.topjava.repository.jdbc.JdbcMealAutoChooseDbRepository">
+            <constructor-arg ref="jdbcTemplate"/>
+            <constructor-arg ref="namedJdbcTemplate"/>
+        </bean>
+    </beans>
+
+    <beans profile="jdbc_common">
+
+        <bean id="jdbcUserRepository" class="ru.javawebinar.topjava.repository.jdbc.JdbcUserRepository">
+            <constructor-arg ref="jdbcTemplate"/>
+            <constructor-arg ref="namedJdbcTemplate"/>
+        </bean>
+
         <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
             <constructor-arg ref="dataSource"/>
         </bean>
