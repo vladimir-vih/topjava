@@ -85,8 +85,12 @@ public class JdbcMealAutoChooseDbRepository implements MealRepository {
 
     private Object getDateType(LocalDateTime localDateTime) {
         switch (Profiles.getActiveDbProfile()) {
-            case Profiles.POSTGRES_DB -> {return localDateTime;}
-            case Profiles.HSQL_DB -> {return Timestamp.valueOf(localDateTime);}
+            case Profiles.POSTGRES_DB -> {
+                return localDateTime;
+            }
+            case Profiles.HSQL_DB -> {
+                return Timestamp.valueOf(localDateTime);
+            }
             default -> throw new UnsupportedOperationException();
         }
     }

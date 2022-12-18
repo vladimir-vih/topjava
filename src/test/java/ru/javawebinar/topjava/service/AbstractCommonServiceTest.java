@@ -42,7 +42,7 @@ abstract class AbstractCommonServiceTest {
     };
 
     @BeforeClass
-    public static void prepareFields(){
+    public static void prepareFields() {
         log = getLogger("result");
         results = new StringBuilder();
     }
