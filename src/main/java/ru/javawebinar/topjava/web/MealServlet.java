@@ -33,7 +33,6 @@ public class MealServlet extends HttpServlet {
                 false);
         ConfigurableEnvironment env = springContext.getEnvironment();
         env.setActiveProfiles(Profiles.REPOSITORY_IMPLEMENTATION, Profiles.getActiveDbProfile());
-        springContext.setEnvironment(env);
         springContext.refresh();
         mealController = springContext.getBean(MealRestController.class);
     }

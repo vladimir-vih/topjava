@@ -22,7 +22,6 @@ public class SpringMain {
                 new String[]{"spring/spring-app.xml", "spring/spring-db.xml"}, false)) {
             ConfigurableEnvironment env = appCtx.getEnvironment();
             env.setActiveProfiles(Profiles.REPOSITORY_IMPLEMENTATION, Profiles.getActiveDbProfile());
-            appCtx.setEnvironment(env);
             appCtx.refresh();
             System.out.println("Bean definition names: " + Arrays.toString(appCtx.getBeanDefinitionNames()));
             AdminRestController adminUserController = appCtx.getBean(AdminRestController.class);
