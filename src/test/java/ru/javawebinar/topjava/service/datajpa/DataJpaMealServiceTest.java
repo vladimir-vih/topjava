@@ -10,13 +10,14 @@ import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import static org.junit.Assert.assertThrows;
 import static ru.javawebinar.topjava.MealTestData.*;
-import static ru.javawebinar.topjava.UserTestData.*;
+import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
+import static ru.javawebinar.topjava.UserTestData.USER_ID;
 
 @ActiveProfiles(Profiles.DATAJPA)
 public class DataJpaMealServiceTest extends MealServiceTest {
     @Test
     public void getMealWithUser() {
-        MEAL_MATCHER.assertMatch(service.getWithUser(MEAL1_ID, USER_ID), meal1WithUser);
+        MEAL_WITH_USER_MATCHER.assertMatch(service.getWithUser(MEAL1_ID, USER_ID), meal1WithUser);
     }
 
     @Test

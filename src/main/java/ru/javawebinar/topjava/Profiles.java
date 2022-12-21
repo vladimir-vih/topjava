@@ -4,9 +4,7 @@ import org.springframework.util.ClassUtils;
 
 public class Profiles {
     public static final String
-            JDBC_POSTGRES = "jdbc_postgres",
-            JDBC_HSQLDB = "jdbc_hsqldb",
-            JDBC_AUTO_CHOOSE_DB = "jdbc_auto_choose_DB",
+            JDBC = "jdbc",
             JPA = "jpa",
             DATAJPA = "datajpa",
             INMEMORY = "inmemory";

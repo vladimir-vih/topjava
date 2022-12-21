@@ -1,15 +1,12 @@
 package ru.javawebinar.topjava.repository.datajpa;
 
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
-import ru.javawebinar.topjava.Profiles;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
 import java.util.List;
 
-@Profile(Profiles.DATAJPA)
 @Repository
 public class DataJpaUserRepository implements UserRepository {
     private static final Sort SORT_NAME_EMAIL = Sort.by(Sort.Direction.ASC, "name", "email");

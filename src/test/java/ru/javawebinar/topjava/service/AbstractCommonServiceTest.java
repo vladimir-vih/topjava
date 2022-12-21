@@ -29,7 +29,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 abstract class AbstractCommonServiceTest {
     private static Logger log = LoggerFactory.getLogger(AbstractCommonServiceTest.class);
 
-    private static StringBuilder results;
+    private static StringBuilder results = new StringBuilder();
 
     @Rule
     // http://stackoverflow.com/questions/14892125/what-is-the-best-practice-to-determine-the-execution-time-of-the-bussiness-relev
@@ -45,7 +45,8 @@ abstract class AbstractCommonServiceTest {
     @BeforeClass
     public static void prepareFields() {
         log = getLogger("result");
-        results = new StringBuilder();
+//        results = new StringBuilder();
+        results.setLength(0);
     }
 
     @AfterClass

@@ -8,7 +8,7 @@ import ru.javawebinar.topjava.Profiles;
 
 import java.time.LocalDateTime;
 
-@Profile(Profiles.JDBC_POSTGRES)
+@Profile(Profiles.POSTGRES_DB)
 @Repository
 public class PostgresJdbcMealRepository extends ProfiledJdbcMealRepository<LocalDateTime> {
     public PostgresJdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {

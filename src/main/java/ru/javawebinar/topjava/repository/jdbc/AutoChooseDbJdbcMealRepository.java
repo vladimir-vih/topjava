@@ -18,7 +18,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Profile(Profiles.JDBC_AUTO_CHOOSE_DB)
+@Profile("!" + Profiles.POSTGRES_DB + "&!" + Profiles.HSQL_DB) /*"!postgres&!hsqldb"*/
 @Repository
 public class AutoChooseDbJdbcMealRepository implements MealRepository {
     private static final RowMapper<Meal> ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
@@ -88,14 +88,6 @@ public class AutoChooseDbJdbcMealRepository implements MealRepository {
     }
 
     private Object getDateType(LocalDateTime localDateTime) {
-        switch (Profiles.getActiveDbProfile()) {
-            case Profiles.POSTGRES_DB -> {
-                return localDateTime;
-            }
-            case Profiles.HSQL_DB -> {
-                return Timestamp.valueOf(localDateTime);
-            }
-            default -> throw new UnsupportedOperationException();
-        }
+        return Timestamp.valueOf(localDateTime);
     }
 }
